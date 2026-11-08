@@ -1344,6 +1344,12 @@ body.pauly-startup-ready #app{visibility:visible!important}
 .admin-migrate-btn{width:100%;padding:12px;border:0;border-radius:10px;background:#A6FF3B;color:#10150B;font-size:12px;font-weight:900}
 .admin-summary strong{font-size:25px;opacity:1}
 .admin-account-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 2px;border:0;border-top:1px solid var(--border,rgba(255,255,255,.1));background:transparent;color:inherit;text-align:left}
+.admin-accounts-scroll{max-height:min(48vh,440px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--accent,#A6FF3B) rgba(255,255,255,.08);border-bottom:1px solid var(--border,rgba(255,255,255,.1))}
+.admin-accounts-scroll::-webkit-scrollbar{width:6px}
+.admin-accounts-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.08);border-radius:8px}
+.admin-accounts-scroll::-webkit-scrollbar-thumb{background:var(--accent,#A6FF3B);border-radius:8px}
+.admin-account-scroll-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:0 0 8px}
+.admin-account-scroll-controls button{border:1px solid var(--border,rgba(255,255,255,.14));border-radius:9px;background:var(--card2,#242424);color:inherit;padding:7px 11px;font-size:12px;font-weight:700}
 .admin-account-main{display:flex;flex-direction:column;gap:5px;min-width:0}
 .admin-account-main strong{font-size:13px;overflow-wrap:anywhere}
 .admin-account-main small,.admin-account-count,.admin-last-update{font-size:11px;opacity:.65}
@@ -3694,8 +3700,12 @@ async function openAdminDashboard() {
     const migrationPrompt = ownerAccount && Number(ownerAccount.bet_count || 0) === 0
       ? '<div class="admin-migrate-card"><strong>Importer ton historique actuel</strong><p>Transférer tes paris vers ce compte personnel, sans supprimer ni modifier la sauvegarde d’origine.</p><button class="admin-migrate-btn" onclick="migrateOwnerBets()">Importer mes paris</button></div>'
       : '';
-    content.innerHTML = migrationPrompt + '<div class="admin-summary"><strong>' + adminAccountsCache.length + '</strong><span>compte(s) inscrit(s)</span></div>' +
-      adminAccountsCache.map(account => '<button class="admin-account-row" onclick="viewAdminAccount(\'' + escapeAdminHtml(account.user_id) + '\')"><span class="admin-account-main"><strong>' + escapeAdminHtml(account.email || 'E-mail indisponible') + '</strong><small>Inscription : ' + (account.created_at ? new Date(account.created_at).toLocaleDateString('fr-FR') : '—') + '</small></span><span class="admin-account-count">' + Number(account.bet_count || 0) + ' paris　›</span></button>').join('');
+    content.innerHTML = migrationPrompt +
+      '<div class="admin-summary"><strong>' + adminAccountsCache.length + '</strong><span>compte(s) inscrit(s)</span></div>' +
+      '<div class="admin-account-scroll-controls"><button type="button" onclick="document.getElementById(\'admin-accounts-scroll\').scrollTo({top:0,behavior:\'smooth\'})">↑ Haut</button><button type="button" onclick="(function(el){el.scrollTo({top:el.scrollHeight,behavior:\'smooth\'})})(document.getElementById(\'admin-accounts-scroll\'))">↓ Bas</button></div>' +
+      '<div id="admin-accounts-scroll" class="admin-accounts-scroll">' +
+      adminAccountsCache.map(account => '<button class="admin-account-row" onclick="viewAdminAccount(\\'' + escapeAdminHtml(account.user_id) + '\\')"><span class="admin-account-main"><strong>' + escapeAdminHtml(account.email || 'E-mail indisponible') + '</strong><small>Inscription : ' + (account.created_at ? new Date(account.created_at).toLocaleDateString('fr-FR') : '—') + '</small></span><span class="admin-account-count">' + Number(account.bet_count || 0) + ' paris　›</span></button>').join('') +
+      '</div>';
   } catch (e) {
     content.innerHTML = '<div class="sync-status-line err">Impossible de charger les comptes : ' + escapeAdminHtml(e.message || e) + '</div>';
   }
